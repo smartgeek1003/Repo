@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model disciplines {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @unique
+  termId             Int
+  createdAt          DateTime             @default(now()) @db.Timestamp(6)
+  terms              terms                @relation(fields: [termId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  teacherDisciplines teacherDisciplines[]
+}
+
+model terms {
+  id          Int           @id @default(autoincrement())
+  number      Int           @unique
+  createdAt   DateTime      @default(now()) @db.Timestamp(6)
+  disciplines disciplines[]
+}
+
+model user {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(100)
+  password  String
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
+model categories {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  tests     tests[]
+}
+
+model teachers {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @unique
+  createdAt          DateTime             @default(now()) @db.Timestamp(6)
+  teacherDisciplines teacherDisciplines[]
+}
+
+model tests {
+  id                   Int                @id @default(autoincrement())
+  name                 String
+  pdfUrl               String
+  categoryId           Int
+  teachersDisciplineId Int
+  createdAt            DateTime           @default(now()) @db.Timestamp(6)
+  categories           categories         @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  teacherDisciplines   teacherDisciplines @relation(fields: [teachersDisciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model teacherDisciplines {
+  id           Int         @id @default(autoincrement())
+  disciplineId Int
+  teacherId    Int
+  disciplines  disciplines @relation(fields: [disciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  teachers     teachers    @relation(fields: [teacherId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tests        tests[]
+}
